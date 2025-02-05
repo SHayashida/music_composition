@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>サティ・アンビエント プレイヤー</title>
+  <!-- html-midi-player ライブラリの読み込み（CDN経由） -->
+  <script src="https://cdn.jsdelivr.net/npm/html-midi-player/dist/html-midi-player.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: #f0f0f0;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>エリック・サティ風アンビエント・ミュージック</h1>
+  <p>以下のプレイヤーで MIDI ファイルを再生できます。</p>
+  <!-- 同一ディレクトリに配置された satie_ambient.mid を指定 -->
+  <midi-player src="satie_ambient.mid" controls></midi-player>
+</body>
+</html>
