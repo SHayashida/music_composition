@@ -1,54 +1,65 @@
 from midiutil import MIDIFile
 
-# --- 基本パラメータ設定 ---
+# --- 基本パラメータ ---
 track = 0
-channel = 0         # ピアノの場合、通常はチャンネル0
-tempo = 60          # BPM 60：1拍が1秒なので、ゆったりとしたパヴァーヌの雰囲気に
-volume = 100        # メロディの音量（和音は半音量程度に調整）
+channel = 0        # ピアノの場合は通常チャンネル0
+tempo = 60         # BPM 60：1拍＝1秒、ゆったりとした雰囲気
+volume = 100       # メロディの音量（伴奏は半音量で表現）
+measure_duration = 4  # 各小節4拍
 
-# 1トラックの MIDI ファイルを作成
+# --- MIDIファイル作成 ---
 midi = MIDIFile(1)
 midi.addTempo(track, 0, tempo)
 
-# --- ヘルパー関数 ---
-def add_main_theme(midi, start_time, measures, track, channel, volume):
+# --- モチーフとコード進行の定義 ---
+# オリジナル・モチーフ（右手）： D4, F4, A4, C5, A4, F4, D4
+motif_original = [(62, 0.5), (65, 0.5), (69, 1), (72, 0.5), (69, 0.5), (65, 0.5), (62, 0.5)]
+# バリエーション・モチーフ（第2音を若干変更）
+motif_variant  = [(62, 0.5), (67, 0.5), (69, 1), (72, 0.5), (69, 0.5), (65, 0.5), (62, 0.5)]
+
+# A型コード進行： Dm – Dm – Bb – C – A7 – Dm
+progression_A = [
+    [50, 53, 57],        # Dm (D3, F3, A3)
+    [50, 53, 57],        # Dm
+    [58, 62, 65],        # Bb (Bb3, D4, F4)
+    [60, 64, 67],        # C  (C4, E4, G4)
+    [45, 49, 52, 55],     # A7 (A2, C#3, E3, G3)
+    [50, 53, 57]         # Dm
+]
+
+# B型コード進行： Dm – Gm – Bb – A7 – F – Dm
+progression_B = [
+    [50, 53, 57],        # Dm
+    [55, 58, 62],        # Gm (G3, Bb3, D4)
+    [58, 62, 65],        # Bb
+    [45, 49, 52, 55],     # A7
+    [53, 57, 60],        # F (F3, A3, C4)
+    [50, 53, 57]         # Dm
+]
+
+# --- セクション1: エクスポジション（主題部） ---
+def add_exposition_section(midi, start_time, measures, track, channel, volume):
     """
-    【主題部】
-    穏やかで優しい主題。右手（高音域）でモチーフを刻み、左手（低音域）で和音を伴奏します。
-    
-    主題モチーフ（例）： D4, F4, A4, C5, A4, F4, D4
-    （MIDIノート番号：C4=60 として、D4=62, F4=65, A4=69, C5=72）
-    
-    各小節は4拍とし、和音は1小節全体にわたって持続させます。
-    また、6小節ごとに以下の和音進行を繰り返します：
-      1. Dm   (D3, F3, A3)　　→　[50, 53, 57]
-      2. Dm   (D3, F3, A3)
-      3. Bb   (Bb3, D4, F4)　　→　[58, 62, 65]
-      4. C    (C4, E4, G4)　　→　[60, 64, 67]
-      5. A7   (A2, C#3, E3, G3) →　[45, 49, 52, 55]
-      6. Dm   (D3, F3, A3)　　→　[50, 53, 57]
+    エクスポジション部：  
+    6小節ごとのサイクルで、A型とB型のコード進行およびモチーフ（オリジナルと変化形）を交互に配置します。
     """
-    measure_duration = 4  # 4拍
-    # 主題モチーフ：各タプルは (MIDIノート, 持続拍数)
-    motif = [(62, 0.5), (65, 0.5), (69, 1), (72, 0.5), (69, 0.5), (65, 0.5), (62, 0.5)]
-    
-    # 和音進行（6小節周期）
-    chords_main = [
-        [50, 53, 57],      # Dm
-        [50, 53, 57],      # Dm
-        [58, 62, 65],      # Bb（Bb3, D4, F4）
-        [60, 64, 67],      # C（C4, E4, G4）
-        [45, 49, 52, 55],   # A7（A2, C#3, E3, G3）
-        [50, 53, 57]       # Dm
-    ]
-    num_cycles = measures // 6  # 6小節ごとの繰り返し
     current_time = start_time
+    cycle_length = 6  # 6小節のサイクル
+    num_cycles = measures // cycle_length
     for cycle in range(num_cycles):
-        for chord in chords_main:
-            # 左手：和音を小節全体にわたって（音量を半分に）
+        # サイクルごとに使用する進行とモチーフを決定
+        if cycle % 2 == 0:
+            progression = progression_A
+            motif = motif_original
+        else:
+            progression = progression_B
+            motif = motif_variant
+        # 6小節分ループ
+        for chord in progression:
+            # 左手：伴奏として和音（音量は控えめに）
             for note in chord:
                 midi.addNote(track, channel, note, current_time, measure_duration, volume // 2)
-            # 右手：主題モチーフを刻む
+            # 右手：モチーフを刻む（小節内に収まるように）
             t = current_time
             for note, dur in motif:
                 midi.addNote(track, channel, note, t, dur, volume)
@@ -56,51 +67,96 @@ def add_main_theme(midi, start_time, measures, track, channel, volume):
             current_time += measure_duration
     return current_time
 
+# --- セクション2: 発展部 ---
 def add_development_section(midi, start_time, measures, track, channel, volume):
     """
-    【発展部】
-    主題から展開し、「天から光が差し込む」様子をイメージしたパートです。
-    
-    ここでは、左手はゆったりとした Dm のペダル音（和音）を刻み、
-    右手は上昇するアルペジオ（例：基音から4度、7度、そしてオクターブ上＋）を順次刻んでいくことで、
-    徐々に高まる光のイメージを表現します。
+    発展部：  
+    右手は、天から光が差し込むような印象を与えるため、上昇と下降を交互に行うアルペジオを配置。
+    左手は、Dmのペダル音を持続させつつ、基音が徐々に上昇していくように設定。
     """
-    measure_duration = 4
     current_time = start_time
     for i in range(measures):
-        # 左手：安定した Dm 和音（ペダル）をバックに
-        chord = [50, 53, 57]  # Dm
-        for note in chord:
+        # 左手：安定した Dm の和音
+        for note in [50, 53, 57]:
             midi.addNote(track, channel, note, current_time, measure_duration, volume // 2)
-        # 右手：上昇するアルペジオ
-        # i が進むごとに基音を少しずつ上げることで、光が降り注ぐイメージを付与
-        base_pitch = 62 + (i // 2)  # 2小節ごとに 1 音上昇
-        arpeggio = [base_pitch, base_pitch + 4, base_pitch + 7, base_pitch + 12]
+        # 基本の基音を徐々に上昇（2小節ごとに1音上昇）
+        base_pitch = 62 + (i // 2)
+        # 奇数小節は下降、偶数小節は上昇のアルペジオ
+        if i % 2 == 0:
+            arpeggio = [base_pitch, base_pitch + 4, base_pitch + 7, base_pitch + 12]
+        else:
+            arpeggio = [base_pitch + 12, base_pitch + 7, base_pitch + 4, base_pitch]
+        note_dur = measure_duration / len(arpeggio)
         t = current_time
-        note_duration = measure_duration / len(arpeggio)
         for note in arpeggio:
-            midi.addNote(track, channel, note, t, note_duration, volume)
-            t += note_duration
+            midi.addNote(track, channel, note, t, note_dur, volume)
+            t += note_dur
         current_time += measure_duration
     return current_time
 
-# --- 作曲の構成 ---
+# --- セクション3: 転調部（ブリッジ） ---
+def add_transition_section(midi, start_time, measures, track, channel, volume):
+    """
+    転調部：  
+    発展部から再現部へと戻るための4小節のブリッジ。  
+    右手は高音から徐々に下行するクロマチックなラインで、調性を安定させる。
+    最後の小節で Dm を強調します。
+    """
+    current_time = start_time
+    # 最初の3小節：クロマチック下降のメロディ
+    for i in range(measures - 1):
+        # 1小節分、4拍に分けて下降
+        start_pitch = 74 - i*2  # 高音からスタートし、徐々に下がる
+        for beat in range(4):
+            pitch = start_pitch - beat
+            midi.addNote(track, channel, pitch, current_time + beat, 1, volume)
+        current_time += measure_duration
+    # 最終小節：Dmの和音をしっかり配置して回帰感を強調
+    for note in [50, 53, 57]:
+        midi.addNote(track, channel, note, current_time, measure_duration, volume)
+    # 同時に、右手で短いモチーフ（オリジナル）を配置
+    t = current_time
+    for note, dur in motif_original:
+        midi.addNote(track, channel, note, t, dur, volume)
+        t += dur
+    current_time += measure_duration
+    return current_time
+
+# --- セクション4: 再現部 ---
+def add_recapitulation_section(midi, start_time, measures, track, channel, volume):
+    """
+    再現部：  
+    エクスポジション部のオリジナルのコード進行（A型）とモチーフで、  
+    主題の確固たる回帰と、優しい王女のイメージを強調します。
+    """
+    current_time = start_time
+    # ここでは progression_A と motif_original を固定的に用いる
+    num_cycles = measures // 6
+    for cycle in range(num_cycles):
+        for chord in progression_A:
+            for note in chord:
+                midi.addNote(track, channel, note, current_time, measure_duration, volume // 2)
+            t = current_time
+            for note, dur in motif_original:
+                midi.addNote(track, channel, note, t, dur, volume)
+                t += dur
+            current_time += measure_duration
+    return current_time
+
+# --- 全体の構成 ---
+# エクスポジション：30小節
+# 発展部：30小節
+# 転調部：4小節
+# 再現部：30小節
+
 current_time = 0
-main_measures = 30          # 主題部：30小節（約2分）
-development_measures = 30   # 発展部：30小節（約2分）
-recapitulation_measures = 30  # 再現部：30小節（約2分）
-
-# セクション 1：主題部
-current_time = add_main_theme(midi, current_time, main_measures, track, channel, volume)
-
-# セクション 2：発展部（天から光が差し込む様子を表現）
-current_time = add_development_section(midi, current_time, development_measures, track, channel, volume)
-
-# セクション 3：再現部（主題へしっかりと回帰）
-current_time = add_main_theme(midi, current_time, recapitulation_measures, track, channel, volume)
+current_time = add_exposition_section(midi, current_time, 30, track, channel, volume)
+current_time = add_development_section(midi, current_time, 30, track, channel, volume)
+current_time = add_transition_section(midi, current_time, 4, track, channel, volume)
+current_time = add_recapitulation_section(midi, current_time, 30, track, channel, volume)
 
 # --- MIDI ファイル出力 ---
-with open("pavane_for_the_deceased_princess.mid", "wb") as output_file:
+with open("luminous_reminiscence.mid", "wb") as output_file:
     midi.writeFile(output_file)
 
-print("MIDIファイル『pavane_for_the_deceased_princess.mid』が作成されました。")
+print("MIDIファイル『luminous_reminiscence.mid』が作成されました。")

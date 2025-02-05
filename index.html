@@ -2,27 +2,67 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>サティ・アンビエント プレイヤー</title>
+  <title>エリック・サティ風アンビエント・ミュージック</title>
+  <!-- Bootstrap CSS の読み込み（CDN経由） -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- html-midi-player ライブラリの読み込み（CDN経由） -->
   <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0"></script>
   <style>
     body {
-      font-family: sans-serif;
-      text-align: center;
+      background: #f8f9fa;
       padding: 2rem;
-      background: #f0f0f0;
     }
     h1 {
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .midi-card {
+      margin-bottom: 1.5rem;
     }
   </style>
 </head>
 <body>
-  <h1>エリック・サティ風アンビエント・ミュージック</h1>
-  <p>以下のプレイヤーで MIDI ファイルを再生できます。</p>
-  <!-- visualizer属性を削除 -->
-  <midi-player src="satie_ambient.mid" sound-font></midi-player>
-  <midi-player src="pavane_for_dead_princess.mid" sound-font></midi-player>
-  <midi-player src="pavane_for_the_deceased_princess.mid" sound-font></midi-player>
+  <div class="container">
+    <h1 class="text-center">エリック・サティ風アンビエント・ミュージック</h1>
+    <div class="row justify-content-center">
+      <!-- 1つ目のMIDIプレイヤー -->
+      <div class="col-md-8 midi-card">
+        <div class="card">
+          <div class="card-header">
+            サティ・アンビエント
+          </div>
+          <div class="card-body">
+            <midi-player src="satie_ambient.mid" sound-font></midi-player>
+          </div>
+        </div>
+      </div>
+      <!-- 2つ目のMIDIプレイヤー -->
+      <div class="col-md-8 midi-card">
+        <div class="card">
+          <div class="card-header">
+            亡き王女を弔うパヴァーヌ
+          </div>
+          <div class="card-body">
+            <midi-player src="pavane_for_dead_princess.mid" sound-font></midi-player>
+          </div>
+        </div>
+      </div>
+      <!-- 3つ目のMIDIプレイヤー -->
+      <div class="col-md-8 midi-card">
+        <div class="card">
+          <div class="card-header">
+            追憶の輝き
+          </div>
+          <div class="card-body">
+            <midi-player src="luminous_reminiscence.mid" sound-font></midi-player>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Optional: Bootstrap JS, Popper.js and jQuery (必要に応じて読み込み) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
