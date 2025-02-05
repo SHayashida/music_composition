@@ -21,6 +21,24 @@
   <h1>エリック・サティ風アンビエント・ミュージック</h1>
   <p>以下のプレイヤーで MIDI ファイルを再生できます。</p>
   <!-- 同一ディレクトリに配置された satie_ambient.mid を指定 -->
-  <midi-player src="satie_ambient.mid" controls></midi-player>
+  <midi-player
+  src="satie_ambient.mid"
+  sound-font visualizer="#myVisualizer">
+  </midi-player>
+<midi-visualizer type="piano-roll" id="myVisualizer"></midi-visualizer>
+
+<midi-player
+src="spavane_for_dead_princess.mid"
+sound-font visualizer="#myVisualizer">
+</midi-player>
+<midi-visualizer type="piano-roll" id="myVisualizer"></midi-visualizer>
+
+<midi-player
+src="pavane_for_the_deceased_princess.mid"
+sound-font visualizer="#myVisualizer">
+</midi-player>
+<midi-visualizer type="piano-roll" id="myVisualizer"></midi-visualizer>
+
+
 </body>
 </html>
